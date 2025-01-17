@@ -14,7 +14,7 @@ jobs:
 
       # Build Docker Image
       - name: Build Docker Image
-        run: docker build --file Dockerfile --tag workflow-test:$(date +%s) .
+        run: docker build --file DockerFile --tag workflow-test:$(date +%s) .
 
   # Job 1: Build and Test
   build-and-test:
@@ -68,7 +68,7 @@ jobs:
         with:
           context: .                     # Specify the build context
           push: true                     # Push the image to Docker Hub
-          file: Dockerfile               # Explicitly specify the Dockerfile
+          file: ./DockerFile           # Explicitly specify the Dockerfile
           tags: ${{ secrets.DOCKER_USERNAME }}/flasktest-app:latest
 
       # Step 5: Log Image Digest
