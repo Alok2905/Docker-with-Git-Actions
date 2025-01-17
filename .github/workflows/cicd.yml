@@ -1,70 +1,66 @@
-name: CI/CD for dockerized flask app
+name: CI/CD for Dockerized Flask App
+
 on:
-    push:
-      branches: [main]
-    pull_request:
-        branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-    build-and-test:
-        runs-on: ubuntu-latest
+  # Job 1: Build and Test
+  build-and-test:
+    runs-on: ubuntu-latest
 
-        steps:
-        #Step1 Checkout the code
-        - name: Checkout code
-          uses: actions/checkout@v3
-        #Step2: set the python environment
-        - name: Set up the python
-          uses: actions/checkout@v4
-          with:
-            python-version: "3.10"
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-        #Step3: Install Depemndencies
-        - name: Install Dependencies
-          run:
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
+      # Step 2: Set up the Python environment
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-        #Step4: Run the test cases
-        - name: Run Test Case
-          run:
-            pytest
-    
-    ## Build and publish the docker images
-    build-and-publish:
-        needs: build-and-test
-        runs-on: ubuntu-latest
-        
-        #steps to build and publish
-        #Step 1: Check out the code
-        steps:
-        - name: Check out the code
-          uses: actions/checkout@v3
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-        #Step2: set up the buildx
-        - name: et up docker buildx
-          uses: docker/setup-buildx-action@v2
+      # Step 4: Run the test cases
+      - name: Run Test Cases
+        run: pytest
 
-        #Step3: Set login credentials of the git repo
-        - name: Login to docker hub
-          uses: docker/login-action@v2
-          with:
-            username: ${{secrets.DOCKER_USERNAME}}
-            password: ${{secrets.DOCKER_PASSWORD}}
-        
-        #Step4: buil;d and push docker image
-        - name: Build and push docker image
-          uses: docker/build-push-action@v4
-          with:
-            context: .
-            push: true
-            tags: ${{secrets.DOCKER_USERNAME}}/flasktest-app:latest
+  # Job 2: Build and Publish Docker Image
+  build-and-publish:
+    needs: build-and-test
+    runs-on: ubuntu-latest
 
-        - name: Image digest
-          run: echo ${{steps.build-and-publish.outputs.digest}}
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-        
+      # Step 2: Set up Docker Buildx
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
+      # Step 3: Log in to Docker Hub
+      - name: Log In to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Step 4: Build and Push Docker Image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/flasktest-app:latest
 
-
+      # Step 5: Log Image Digest
+      - name: Log Image Digest
+        run: echo "Image Digest: ${{ steps.build-and-publish.outputs.digest }}"
