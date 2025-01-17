@@ -64,4 +64,5 @@ jobs:
 
       # Step 5: Log Image Digest
       - name: Log Image Digest
-        run: echo "Image Digest: ${{ steps.build-and-publish.outputs.digest }}"
+        run: echo ${{ steps.build-and-publish.outputs.digest }}
+
