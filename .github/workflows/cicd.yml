@@ -11,8 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: build docker image
-        run: docker build --file DockerFile --tag workflow-test:$(date+%s)
+
+      # Build Docker Image
+      - name: Build Docker Image
+        run: docker build --file Dockerfile --tag workflow-test:$(date +%s) .
+
   # Job 1: Build and Test
   build-and-test:
     runs-on: ubuntu-latest
@@ -49,7 +52,7 @@ jobs:
         uses: actions/checkout@v3
 
       # Step 2: Set up Docker Buildx
-      - name: Set Up Docker buildx
+      - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       # Step 3: Log in to Docker Hub
@@ -63,12 +66,11 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          push: true
-          file: DockerFile
+          context: .                     # Specify the build context
+          push: true                     # Push the image to Docker Hub
+          file: Dockerfile               # Explicitly specify the Dockerfile
           tags: ${{ secrets.DOCKER_USERNAME }}/flasktest-app:latest
 
       # Step 5: Log Image Digest
       - name: Log Image Digest
-        run: echo ${{ steps.build-and-publish.outputs.digest }}
-
+        run: echo  ${{ steps.build-and-publish.outputs.digest }}
